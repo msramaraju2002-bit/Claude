@@ -1,6 +1,6 @@
-﻿using ClaudeTestApp.AI.Models;
+﻿using ClaudeTestApp.Domain.Models;
 
-namespace ClaudeTestApp.MCPServer.Services
+namespace ClaudeTestApp.Application.Abstractions
 {
     public interface IOrderService
     {

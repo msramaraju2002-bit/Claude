@@ -9,7 +9,7 @@ using System.Text;
 using StopReason = Anthropic.Models.Messages.StopReason;
 using ClaudeTestApp.AI.Extensions;
 using System.Diagnostics;
-using ClaudeTestApp.AI.Managers;
+using ClaudeTestApp.Application.Common;
 
 namespace ClaudeTestApp
 {
@@ -17,6 +17,7 @@ namespace ClaudeTestApp
     {
         List<ChatMessage> chatMessages = new List<ChatMessage>();
         IChatService chatManager = null;
+        private readonly IChatServiceFactory _chatServiceFactory;
         string sessionId= SessionManager.GetNewSessionId();
         string systemPrompt = """
             You are a ShopAssist AI and Customer Support Assistant.
@@ -623,9 +624,10 @@ namespace ClaudeTestApp
             Never substitute an AI assumption for information that should
             come from a trusted system.
             """;
-        public FrmChat()
+        public FrmChat(IChatServiceFactory chatServiceFactory)
         {
             InitializeComponent();
+            _chatServiceFactory = chatServiceFactory;
         }
 
         private void AddChatMessage(
@@ -663,7 +665,7 @@ namespace ClaudeTestApp
         {
             try
             {
-                chatManager = new ChatService(systemPrompt, sessionId);
+                chatManager = _chatServiceFactory.Create(systemPrompt, sessionId);
                 chatMessages.AddUserMessage(txtPrompt.Text);
                 AddChatMessage("You", txtPrompt.Text, true);
                 

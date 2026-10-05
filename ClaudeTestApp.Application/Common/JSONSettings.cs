@@ -6,7 +6,7 @@ using System.Text.Json.Serialization;
 using System.Text.Json;
 using System.Threading.Tasks;
 
-namespace ClaudeTestApp.AI.Managers
+namespace ClaudeTestApp.Application.Common
 {
     public static class JSONSettings
     {

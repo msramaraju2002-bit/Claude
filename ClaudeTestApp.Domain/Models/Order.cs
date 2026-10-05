@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ClaudeTestApp.AI.Models
+namespace ClaudeTestApp.Domain.Models
 {
     public class OrderDetails
     {

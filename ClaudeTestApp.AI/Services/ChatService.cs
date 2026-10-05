@@ -11,8 +11,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using ClaudeTestApp.AI.Extensions;
-using ModelContextProtocol.Client;
-using ModelContextProtocol.Protocol;
+using ClaudeTestApp.Application.Abstractions;
 using Role = Anthropic.Models.Messages.Role;
 
 namespace ClaudeTestApp.AI.Services
@@ -21,8 +20,9 @@ namespace ClaudeTestApp.AI.Services
     {
         private AnthropicClient _client;
         private string _systemPrompt;
+        private readonly ToolService _toolService;
 
-        public ChatService(string systemPrompt,string sessionId) {
+        public ChatService(IRemoteToolService remoteToolService, string systemPrompt,string sessionId) {
             string apiKey = ConfigurationManager.AppSettings["AnthropicApiKey"];
 
             _client = new AnthropicClient
@@ -30,9 +30,10 @@ namespace ClaudeTestApp.AI.Services
                 ApiKey = apiKey
             };
             _systemPrompt = systemPrompt;
+            _toolService = new ToolService(remoteToolService);
         }
 
-        public ChatService()
+        public ChatService(IRemoteToolService remoteToolService)
         {
             string apiKey = ConfigurationManager.AppSettings["AnthropicApiKey"];
 
@@ -40,6 +41,7 @@ namespace ClaudeTestApp.AI.Services
             {
                 ApiKey = apiKey
             };
+            _toolService = new ToolService(remoteToolService);
         }
 
         /// <summary>
@@ -50,7 +52,7 @@ namespace ClaudeTestApp.AI.Services
         /// <returns></returns>
         public async Task<Models.ChatResponse> SendMessageAsync(List<ChatMessage> chatMessages, CancellationToken cancellationToken = default)
         {
-            ToolService toolService = new ToolService();
+            ToolService toolService = _toolService;
             var anthropicMessages = chatMessages
             .Where(m => m.Role == ChatRole.User ||
                         m.Role == ChatRole.Assistant)
@@ -66,7 +68,7 @@ namespace ClaudeTestApp.AI.Services
             var stopwatch = Stopwatch.StartNew();
             Message message = await GetMessage(toolService, anthropicMessages);
 
-            Models.ChatResponse claudeResponse = new Models.ChatResponse(message, ChatResponseMessageType.Text);
+            Models.ChatResponse claudeResponse = new Models.ChatResponse(message, ChatResponseMessageType.Text, toolService);
 
             while(claudeResponse.ExecutedTool)
             {
@@ -85,7 +87,7 @@ namespace ClaudeTestApp.AI.Services
                     })
                     .ToList();
                 message = await GetMessage(toolService, anthropicMessages);
-                claudeResponse = new Models.ChatResponse(message, ChatResponseMessageType.Text);
+                claudeResponse = new Models.ChatResponse(message, ChatResponseMessageType.Text, toolService);
             }
 
             stopwatch.Stop();
@@ -112,7 +114,7 @@ namespace ClaudeTestApp.AI.Services
                             }
                                     }
                                 ),
-                                Tools = toolService.GetToolsList(true),
+                                Tools = await toolService.GetToolsListAsync(true),
                                 ToolChoice = new Anthropic.Models.Messages.ToolChoice(new ToolChoiceAuto())
 
 
@@ -152,7 +154,7 @@ namespace ClaudeTestApp.AI.Services
 
             stopwatch.Stop();
 
-            Models.ChatResponse claudeResponse = new Models.ChatResponse(message,ChatResponseMessageType.JSON);
+            Models.ChatResponse claudeResponse = new Models.ChatResponse(message,ChatResponseMessageType.JSON, _toolService);
             claudeResponse.TimeTaken = stopwatch.ElapsedMilliseconds;
 
             return claudeResponse;

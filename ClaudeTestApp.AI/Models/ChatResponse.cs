@@ -35,11 +35,10 @@ namespace ClaudeTestApp.AI.Models
         public bool ExecutedTool { get; set; } = false;
 
 
-        public ChatResponse(Anthropic.Models.Messages.Message message, ChatResponseMessageType messageType)
+        internal ChatResponse(Anthropic.Models.Messages.Message message, ChatResponseMessageType messageType, ToolService toolService)
         {
 
             var anthropicMessage = new StringBuilder();
-            ToolService toolService=new ToolService();
             var executeTool = false;
 
             if (messageType is ChatResponseMessageType.JSON )

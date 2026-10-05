@@ -5,11 +5,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ClaudeTestApp.AI.Services
+namespace ClaudeTestApp.MCPServer.Client
 {
     public static class McpClientFactory
     {
-        public static McpClient Create(string serverAddress)
+        public static async Task<McpClient> CreateAsync(string serverAddress, CancellationToken cancellationToken = default)
         {
             var transportOptions = new HttpClientTransportOptions
             {
@@ -18,10 +18,9 @@ namespace ClaudeTestApp.AI.Services
 
             var transport = new HttpClientTransport(transportOptions);
 
-            return McpClient
-                .CreateAsync(transport)
-                .GetAwaiter()
-                .GetResult();
+            return await McpClient
+                .CreateAsync(transport, cancellationToken: cancellationToken)
+                .ConfigureAwait(false);
         }
     }
 }

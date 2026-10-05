@@ -17,6 +17,7 @@ namespace ClaudeTestApp
     public partial class FrmIntent : Form
     {
         List<ChatMessage> chatMessages = new List<ChatMessage>();
+        private readonly IChatServiceFactory _chatServiceFactory;
 
         string prompt = """
                             Classify the customer's message into one of these intents:
@@ -37,14 +38,15 @@ namespace ClaudeTestApp
                             }}
                        """;
 
-        public FrmIntent()
+        public FrmIntent(IChatServiceFactory chatServiceFactory)
         {
             InitializeComponent();
+            _chatServiceFactory = chatServiceFactory;
         }
 
         private async void btnCallAnthropic_Click(object sender, EventArgs e)
         {
-            IChatService chatManager = new ChatService();
+            IChatService chatManager = _chatServiceFactory.Create();
             chatMessages.Clear();
             string customerMessage = prompt.Replace("{customer_message}", txtPrompt.Text);
             chatMessages.AddUserMessage(customerMessage);

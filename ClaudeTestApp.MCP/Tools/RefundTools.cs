@@ -1,5 +1,5 @@
-﻿using ClaudeTestApp.AI.Models;
-using ClaudeTestApp.MCPServer.Services;
+﻿using ClaudeTestApp.Domain.Models;
+using ClaudeTestApp.Application.Abstractions;
 using ModelContextProtocol.Server;
 using System.ComponentModel;
 

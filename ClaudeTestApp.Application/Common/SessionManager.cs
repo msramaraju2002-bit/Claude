@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ClaudeTestApp.AI.Managers
+namespace ClaudeTestApp.Application.Common
 {
     public static class SessionManager
     {

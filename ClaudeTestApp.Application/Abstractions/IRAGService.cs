@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ClaudeTestApp.AI.Abstractions
+namespace ClaudeTestApp.Application.Abstractions
 {
     public interface IRAGService
     {

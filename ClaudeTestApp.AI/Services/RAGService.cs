@@ -1,7 +1,7 @@
 ﻿using Anthropic.Helpers.Beta;
 using Anthropic.Models.Beta.Messages;
 using Anthropic;
-using ClaudeTestApp.AI.Abstractions;
+using ClaudeTestApp.Application.Abstractions;
 using System;
 using System.Collections.Generic;
 using System.Linq;

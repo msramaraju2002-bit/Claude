@@ -1,8 +1,8 @@
-﻿using ClaudeTestApp.AI.Managers;
-using ClaudeTestApp.AI.Models;
+﻿using ClaudeTestApp.Application.Abstractions;
+using ClaudeTestApp.Domain.Models;
 using System.Text.Json;
 
-namespace ClaudeTestApp.MCPServer.Services
+namespace ClaudeTestApp.Infrastructure.Services
 {
     public class OrderService : IOrderService
     {

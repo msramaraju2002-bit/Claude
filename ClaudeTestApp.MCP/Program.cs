@@ -1,4 +1,4 @@
-using ClaudeTestApp.MCPServer.Services;
+using ClaudeTestApp.Infrastructure;
 using ModelContextProtocol.AspNetCore;
 using ModelContextProtocol.Server;
 
@@ -10,7 +10,7 @@ builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
-builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddInfrastructure();
 
 
 builder.Services

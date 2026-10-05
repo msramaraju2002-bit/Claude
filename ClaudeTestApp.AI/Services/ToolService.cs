@@ -1,7 +1,9 @@
 ﻿using Anthropic.Models.Messages;
-using ClaudeTestApp.AI.Managers;
 using ClaudeTestApp.AI.Models;
-using ModelContextProtocol.Client;
+using ClaudeTestApp.Application.Abstractions;
+using ClaudeTestApp.Application.Common;
+using ClaudeTestApp.Application.Dtos;
+using ClaudeTestApp.Domain.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,18 +16,23 @@ namespace ClaudeTestApp.AI.Services
 {
     internal class ToolService
     {
-        public ToolService() { }
+        private readonly IRemoteToolService _remoteToolService;
+
+        public ToolService(IRemoteToolService remoteToolService)
+        {
+            _remoteToolService = remoteToolService;
+        }
 
         public string ExecuteTool(
     ToolUseBlock toolUse,bool useMCP)
         {
             if (useMCP)
             {
-                // Use MCPService to execute the tool remotely
-                McpService mcpService = new McpService();
-                var result = mcpService.CallTool(toolUse);
-                // Serialize the result to string for consistency
-                return JsonSerializer.Serialize(result, JSONSettings.options);
+                // Execute the tool remotely on the MCP server
+                return _remoteToolService
+                    .CallToolAsync(toolUse.Name, toolUse.Input)
+                    .GetAwaiter()
+                    .GetResult();
             }
 
             var orderId =
@@ -67,10 +74,9 @@ namespace ClaudeTestApp.AI.Services
             }, JSONSettings.options);
         }
 
-        public IReadOnlyList<ToolUnion> GetToolsList(bool mcpServer)
+        public async Task<IReadOnlyList<ToolUnion>> GetToolsListAsync(bool mcpServer, CancellationToken cancellationToken = default)
         {
             var toolsList = new List<ToolUnion>();
-            McpService mcpService = new McpService();
             if (!mcpServer)
             {
                 toolsList = new List<ToolUnion>() { ToolConstants.GetOrderStatusTool, ToolConstants.GetRefundEligiblityTool };
@@ -78,9 +84,27 @@ namespace ClaudeTestApp.AI.Services
             }
             else
             {
-                return mcpService.GetTools();
+                var remoteTools = await _remoteToolService.GetToolsAsync(cancellationToken);
+                return remoteTools.Select(ConvertToToolUnion).ToList();
             }
             return toolsList;
+        }
+
+        private static ToolUnion ConvertToToolUnion(ToolDefinition toolDefinition)
+        {
+            var tool = new Tool
+            {
+                Name = toolDefinition.Name,
+                Description = toolDefinition.Description,
+
+                InputSchema = new InputSchema
+                {
+                    Properties = new Dictionary<string, JsonElement>(toolDefinition.Properties),
+                    Required = toolDefinition.Required.ToList()
+                }
+            };
+
+            return new ToolUnion(tool);
         }
 
   
